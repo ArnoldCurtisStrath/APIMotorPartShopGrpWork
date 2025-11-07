@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Motor Parts Shop</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            padding: 50px;
+        }
+        h1 {
+            color: #333;
+        }
+        a {
+            display: inline-block;
+            margin: 20px;
+            padding: 10px 20px;
+            background-color: #000;
+            color: #fff;
+            text-decoration: none;
+        }
+        a:hover {
+            background-color: #333;
+        }
+    </style>
+</head>
+<body>
+    <h1>Welcome to Motor Parts Shop</h1>
+    <p>Your one-stop shop for quality motor parts</p>
+    <a href="{% url 'parts' %}">View Parts</a>
+</body>
+</html>

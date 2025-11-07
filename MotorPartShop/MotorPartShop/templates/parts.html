@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Parts - Motor Parts Shop</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            padding: 50px;
+        }
+        h1 {
+            color: #333;
+        }
+        .parts-list {
+            max-width: 400px;
+            margin: 20px auto;
+            text-align: left;
+        }
+        .part-item {
+            padding: 10px;
+            border-bottom: 1px solid #ccc;
+        }
+        a {
+            display: inline-block;
+            margin: 20px;
+            padding: 10px 20px;
+            background-color: #000;
+            color: #fff;
+            text-decoration: none;
+        }
+        a:hover {
+            background-color: #333;
+        }
+    </style>
+</head>
+<body>
+    <h1>Available Parts</h1>
+    <div class="parts-list">
+        {% for part in parts %}
+        <div class="part-item">
+            <strong>{{ part.name }}</strong> - KSh {{ part.price }}
+        </div>
+        {% endfor %}
+    </div>
+    <a href="{% url 'home' %}">Back to Home</a>
+</body>
+</html>
