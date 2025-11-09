@@ -1,0 +1,28 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ part.name }} - Motor Parts Shop{% endblock %}
+
+{% block content %}
+<h1>{{ part.name }}</h1>
+
+{% if part.image %}
+    <img src="{{ part.image.url }}" alt="{{ part.name }}" style="max-width: 500px; width: 100%; border-radius: 8px; margin-bottom: 1.5rem;">
+{% endif %}
+
+<p><strong>Category:</strong> {{ part.category.name }}</p>
+<p><strong>Price:</strong> KSh {{ part.price }}</p>
+<p><strong>Stock:</strong> {{ part.stock }} available</p>
+<p style="margin: 1.5rem 0;">{{ part.description }}</p>
+
+{% if user.is_authenticated and part.in_stock %}
+    <form method="post" action="{% url 'orders:add_to_cart' part.pk %}" style="margin-bottom: 2rem;">
+        {% csrf_token %}
+        <label for="quantity"><strong>Quantity:</strong></label>
+        <input id="quantity" type="number" name="quantity" value="1" min="1" max="{{ part.stock }}" style="margin: 0 1rem; width: 80px;">
+        <button type="submit">Add to Cart</button>
+    </form>
+{% endif %}
+
+<a href="{% url 'parts:list' %}">Back to Parts</a>
+{% endblock %}
+

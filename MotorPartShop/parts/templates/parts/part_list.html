@@ -1,0 +1,38 @@
+{% extends 'base.html' %}
+
+{% block title %}Parts - Motor Parts Shop{% endblock %}
+
+{% block content %}
+<h1>Available Parts</h1>
+
+<div style="margin: 2rem 0;">
+    <a href="{% url 'parts:list' %}">All Parts</a>
+    {% for category in categories %}
+        | <a href="{% url 'parts:by_category' category.id %}">{{ category.name }}</a>
+    {% endfor %}
+</div>
+
+{% if selected_category %}
+    <h2>{{ selected_category.name }}</h2>
+{% endif %}
+
+{% if parts %}
+<div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 2rem;">
+    {% for part in parts %}
+    <div style="border: 1px solid #ccc; border-radius: 8px; padding: 1rem; box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);">
+        {% if part.image %}
+            <img src="{{ part.image.url }}" alt="{{ part.name }}" style="width: 100%; height: 200px; object-fit: cover; border-radius: 4px;">
+        {% endif %}
+        <h3 style="margin-top: 1rem;">{{ part.name }}</h3>
+        <p style="color: #555;">{{ part.category.name }}</p>
+        <p><strong>KSh {{ part.price }}</strong></p>
+        <p>{% if part.in_stock %}In Stock{% else %}Out of Stock{% endif %}</p>
+        <a href="{% url 'parts:detail' part.pk %}">View Details</a>
+    </div>
+    {% endfor %}
+</div>
+{% else %}
+<p>No parts available in this category.</p>
+{% endif %}
+{% endblock %}
+
