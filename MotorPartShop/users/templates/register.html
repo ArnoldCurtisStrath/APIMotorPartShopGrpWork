@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Registration page</title>
+</head>
+<style>
+body{
+    align-items: center;
+    display: flex;
+    justify-content: center;
+    height: 100vh;
+    margin: 0;
+}
+.container {
+width: 380px;
+background: #fff;
+padding: 25px 30px;
+border-radius: 12px;
+box-shadow: 0 0 25px rgba(0,0,0,0.12);
+}
+h2 {
+text-align: center;
+margin-bottom: 18px;
+color: #0b2c51;
+}
+.inputBox {
+margin-bottom: 12px;
+border-radius: 12px;
+box-shadow: 0 0 25px rgba(0,0,0,0.12);
+}
+h2 {
+text-align: center;
+margin-bottom: 18px;
+color: #0b2c51;
+}
+.inputBox {
+margin-bottom: 12px;
+}
+input {
+width: 100%;
+padding: 12px;
+border: 1px solid #ccc;
+border-radius: 6px;
+font-size: 15px;
+}
+button {
+width: 100%;
+padding: 12px;
+border: none;
+background: #0b2c51;
+color: #fff;
+font-size: 16px;
+border-radius: 6px;
+cursor: pointer;
+margin-top: 10px;
+}
+p {
+text-align: center;
+font-size: 14px;
+margin-top: 12px;
+}
+a { color: #0b2c51; cursor:pointer; }
+#login { display: none; }
+.error {
+color: red;
+font-size: 13px;
+margin-bottom: 8px;
+}
+</style>
+
+
+<body>
+
+
+    <div class="container" id="register">
+<h2>Create Account</h2>
+<div class="error" id="regErr"></div>
+<div class="inputBox"><input type="text" id="regName" placeholder="Full Name" /></div>
+<div class="inputBox"><input type="email" id="regEmail" placeholder="Email" /></div>
+<div class="inputBox"><input type="password" id="regPass" placeholder="Password (min 6 chars)" /></div>
+<button onclick="registerAccount()">Register</button>
+<p>Already have an account? <a onclick="switchToLogin()">Login here</a></p>
+</div>
+
+
+<div class="container" id="login">
+<h2>Login</h2>
+<div class="error" id="logErr"></div>
+<div class="inputBox"><input type="email" id="logEmail" placeholder="Email" /></div>
+<div class="inputBox"><input type="password" id="logPass" placeholder="Password" /></div>
+<button onclick="loginAccount()">Login</button>
+<p>Don't have an account? <a onclick="switchToRegister()">Register here</a></p>
+</div>
+
+
+
+
+<script>
+function switchToLogin(){
+document.getElementById('register').style.display='none';
+document.getElementById('login').style.display='block';
+}
+
+
+function switchToRegister(){
+document.getElementById('login').style.display='none';
+document.getElementById('register').style.display='block';
+}
+
+
+function registerAccount() {
+let name = document.getElementById('regName').value;
+let email = document.getElementById('regEmail').value;
+let pass = document.getElementById('regPass').value;
+let err = document.getElementById('regErr');
+
+
+if(!name || !email || !pass){ err.innerText='All fields required'; return; }
+if(!email.includes('@')){ err.innerText='Email not valid'; return; }
+if(pass.length < 6){ err.innerText='Password must be 6+ characters'; return; }
+
+
+localStorage.setItem('customerEmail', email);
+localStorage.setItem('customerPassword', pass);
+alert('Account Created Successfully ✅');
+switchToLogin();
+}
+
+
+function loginAccount() {
+let email = document.getElementById('logEmail').value;
+let pass = document.getElementById('logPass').value;
+let err = document.getElementById('logErr');
+
+
+let savedEmail = localStorage.getItem('customerEmail');
+let savedPass = localStorage.getItem('customerPassword');
+
+
+if(email==savedEmail && pass==savedPass){
+alert('Login Successful. Welcome to MotorShop Parts!');
+} else {
+err.innerText='Wrong Email or Password';
+}
+}
+</script>
+    
+</body>
+</html>
