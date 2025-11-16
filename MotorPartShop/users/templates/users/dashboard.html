@@ -1,0 +1,59 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<h1>Welcome, {{ user.username }}!</h1>
+
+<div class="row mt-4">
+    <div class="col-md-4">
+        <div class="card text-center">
+            <div class="card-body">
+                <h3>{{ total_orders }}</h3>
+                <p>Total Orders</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card text-center">
+            <div class="card-body">
+                <h3>KSh {{ total_spent }}</h3>
+                <p>Total Spent</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card text-center">
+            <div class="card-body">
+                <a href="{% url 'users:profile' %}" class="btn btn-primary">Edit Profile</a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<h3 class="mt-5">Recent Orders</h3>
+<table class="table">
+    <thead>
+        <tr>
+            <th>Order #</th>
+            <th>Date</th>
+            <th>Status</th>
+            <th>Total</th>
+            <th>Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for order in recent_orders %}
+        <tr>
+            <td>#{{ order.id }}</td>
+            <td>{{ order.created_at|date:"M d, Y" }}</td>
+            <td><span class="badge bg-info">{{ order.get_status_display }}</span></td>
+            <td>KSh {{ order.total_price }}</td>
+            <td><a href="{% url 'orders:order_detail' order.id %}" class="btn btn-sm btn-primary">View</a></td>
+        </tr>
+        {% empty %}
+        <tr><td colspan="5">No orders yet.</td></tr>
+        {% endfor %}
+    </tbody>
+</table>
+
+<a href="{% url 'parts:list' %}" class="btn btn-success">Start Shopping</a>
+{% endblock %}
