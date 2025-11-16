@@ -1,13 +1,375 @@
-{% extends 'base.html' %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>User Profile - MotorPro</title>
+    
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&family=Orbitron:wght@700&display=swap" rel="stylesheet">
 
-{% block content %}
-<h2>Profile</h2>
-<form method="post">
-    {% csrf_token %}
-    <h3>User Information</h3>
-    {{ u_form.as_p }}
-    <h3>Additional Information</h3>
-    {{ p_form.as_p }}
-    <button type="submit">Update</button>
-</form>
-{% endblock %}
+    <style>
+        /* --- Global Styles & Variables (Same as login) --- */
+        :root {
+            --primary-color: #ffc107; /* Strong yellow */
+            --dark-bg: #1a1a1a;
+            --medium-bg: #2a2a2a;
+            --dark-text: #111;
+            --light-text: #f0f0f0;
+            --success-green: #2ecc71;
+            --border-color: #444;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Roboto', sans-serif;
+            background: linear-gradient(135deg, var(--dark-bg), #111);
+            color: var(--light-text);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        /* --- Profile Container --- */
+        .profile-container {
+            background: var(--medium-bg);
+            border-radius: 10px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+            width: 100%;
+            max-width: 500px;
+            border-top: 6px solid var(--primary-color);
+            padding: 30px 40px;
+            animation: fadeIn 0.5s ease-out;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .profile-container h2 {
+            font-family: 'Orbitron', sans-serif;
+            color: var(--primary-color);
+            font-size: 2.2em;
+            text-align: center;
+            margin-bottom: 25px;
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 20px;
+        }
+
+        /* --- View Mode Styles --- */
+        .info-group {
+            margin-bottom: 20px;
+        }
+
+        .info-group label {
+            display: block;
+            font-size: 0.9em;
+            color: #aaa;
+            font-weight: bold;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .info-group p {
+            font-size: 1.1em;
+            color: var(--light-text);
+            padding: 8px 0;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        /* --- Edit Mode (Form) Styles --- */
+        .input-group {
+            position: relative;
+            margin-bottom: 20px;
+        }
+
+        .input-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: bold;
+            font-size: 0.9em;
+            color: #ccc;
+        }
+
+        .input-group input {
+            width: 100%;
+            padding: 12px 15px;
+            background: var(--dark-bg);
+            border: 2px solid var(--border-color);
+            border-radius: 5px;
+            color: var(--light-text);
+            font-size: 1em;
+            transition: border-color 0.3s, box-shadow 0.3s;
+        }
+
+        .input-group input:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 10px rgba(255, 193, 7, 0.2);
+        }
+
+        /* Styles for disabled inputs (like username) */
+        .input-group input:disabled {
+            background: #222;
+            color: #777;
+            cursor: not-allowed;
+        }
+
+        /* --- Button Styles --- */
+        .profile-button {
+            width: 100%;
+            background: var(--primary-color);
+            color: var(--dark-text);
+            border: none;
+            border-radius: 5px;
+            padding: 15px;
+            font-size: 1.1em;
+            font-weight: bold;
+            cursor: pointer;
+            transition: background-color 0.3s, transform 0.1s;
+            margin-top: 10px;
+        }
+        
+        .profile-button:hover {
+            background-color: #ffca2c;
+        }
+
+        .profile-button:active {
+            transform: scale(0.98);
+        }
+
+        /* Secondary button style for "Cancel" */
+        .profile-button.secondary {
+            background: #444;
+            color: var(--light-text);
+        }
+        .profile-button.secondary:hover {
+            background: #555;
+        }
+
+        .button-group {
+            display: flex;
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        /* --- Success Message --- */
+        #success-message {
+            color: var(--success-green);
+            background: rgba(46, 204, 113, 0.1);
+            border: 1px solid var(--success-green);
+            padding: 12px;
+            border-radius: 5px;
+            text-align: center;
+            font-size: 0.9em;
+            margin-bottom: 20px;
+            display: none; /* Hidden by default */
+        }
+
+        /* --- View/Edit Toggle Logic --- */
+        
+        /* By default, the edit form is hidden */
+        .profile-edit {
+            display: none;
+        }
+
+        /* When the container has the 'is-editing' class... */
+        .profile-container.is-editing .profile-view {
+            display: none; /* ...hide the view block */
+        }
+
+        .profile-container.is-editing .profile-edit {
+            display: block; /* ...show the edit form */
+        }
+    </style>
+</head>
+<body>
+
+    <div class="profile-container" id="profile-container">
+        <h2>My Profile</h2>
+
+        <p id="success-message"></p>
+
+        <div class="profile-view" id="profile-view">
+            <div class="info-group">
+                <label>Username</label>
+                <p id="view-username"></p>
+            </div>
+            <div class="info-group">
+                <label>Full Name</label>
+                <p id="view-full-name"></p>
+            </div>
+            <div class="info-group">
+                <label>Email Address</label>
+                <p id="view-email"></p>
+            </div>
+            <div class="info-group">
+                <label>Phone Number</label>
+                <p id="view-phone"></p>
+            </div>
+
+            <button id="edit-btn" class="profile-button">Edit Profile</button>
+        </div>
+
+        <form class="profile-edit" id="profile-edit-form">
+            <div class="input-group">
+                <label for="edit-username">Username</label>
+                <input type="text" id="edit-username" disabled>
+                <small style="color: #999; font-size: 0.8em; margin-top: 5px; display: block;">Usernames cannot be changed.</small>
+            </div>
+            <div class="input-group">
+                <label for="edit-full-name">Full Name</label>
+                <input type="text" id="edit-full-name" required>
+            </div>
+            <div class="input-group">
+                <label for="edit-email">Email Address</label>
+                <input type="email" id="edit-email" required>
+            </div>
+            <div class="input-group">
+                <label for="edit-phone">Phone Number</label>
+                <input type="tel" id="edit-phone" placeholder="e.g., 555-123-4567">
+            </div>
+
+            <div class="button-group">
+                <button type="submit" class="profile-button">Save Changes</button>
+                <button type="button" id="cancel-btn" class="profile-button secondary">Cancel</button>
+            </div>
+        </form>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+
+            // --- MOCK USER DATA ---
+            // In a real app, you'd fetch this from a server after login
+            let currentUser = {
+                username: "admin_mech",
+                fullName: "Alex 'Sparky' Johnson",
+                email: "alex.j@motorpro.com",
+                phone: "555-867-5309"
+            };
+
+            // --- Get DOM Elements ---
+            const profileContainer = document.getElementById('profile-container');
+            const successMessage = document.getElementById('success-message');
+
+            // View Mode Elements
+            const viewUsername = document.getElementById('view-username');
+            const viewFullName = document.getElementById('view-full-name');
+            const viewEmail = document.getElementById('view-email');
+            const viewPhone = document.getElementById('view-phone');
+            const editBtn = document.getElementById('edit-btn');
+
+            // Edit Mode Elements
+            const profileEditForm = document.getElementById('profile-edit-form');
+            const editUsername = document.getElementById('edit-username');
+            const editFullName = document.getElementById('edit-full-name');
+            const editEmail = document.getElementById('edit-email');
+            const editPhone = document.getElementById('edit-phone');
+            const cancelBtn = document.getElementById('cancel-btn');
+
+            // --- Functions ---
+
+            /**
+             * Populates the "View Mode" fields with data from the currentUser object
+             */
+            function populateViewMode() {
+                viewUsername.textContent = currentUser.username;
+                viewFullName.textContent = currentUser.fullName;
+                viewEmail.textContent = currentUser.email;
+                viewPhone.textContent = currentUser.phone || 'Not provided'; // Handle empty phone
+            }
+
+            /**
+             * Populates the "Edit Mode" form fields with data
+             */
+            function populateEditMode() {
+                editUsername.value = currentUser.username;
+                editFullName.value = currentUser.fullName;
+                editEmail.value = currentUser.email;
+                editPhone.value = currentUser.phone;
+            }
+
+            /**
+             * Switches the UI to "Edit Mode"
+             */
+            function showEditMode() {
+                populateEditMode(); // Fill the form with current data
+                profileContainer.classList.add('is-editing');
+                successMessage.style.display = 'none'; // Hide any old messages
+            }
+
+            /**
+             * Switches the UI back to "View Mode"
+             */
+            function showViewMode() {
+                profileContainer.classList.remove('is-editing');
+            }
+
+            /**
+             * Shows a success message that fades out
+             */
+            function showSuccessMessage(message) {
+                successMessage.textContent = message;
+                successMessage.style.display = 'block';
+
+                // Automatically hide the message after 3 seconds
+                setTimeout(() => {
+                    successMessage.style.display = 'none';
+                }, 3000);
+            }
+
+
+            // --- Event Listeners ---
+
+            // Click "Edit Profile" button
+            editBtn.addEventListener('click', showEditMode);
+
+            // Click "Cancel" button
+            cancelBtn.addEventListener('click', showViewMode);
+
+            // "Save Changes" form submission
+            profileEditForm.addEventListener('submit', (e) => {
+                e.preventDefault(); // Stop the form from reloading the page
+
+                // 1. Get new values from the form
+                const newFullName = editFullName.value.trim();
+                const newEmail = editEmail.value.trim();
+                const newPhone = editPhone.value.trim();
+
+                // 2. Simple validation
+                if (newFullName === '' || newEmail === '') {
+                    alert('Full Name and Email are required.');
+                    return;
+                }
+
+                // 3. Update the mock user data
+                currentUser.fullName = newFullName;
+                currentUser.email = newEmail;
+                currentUser.phone = newPhone;
+
+                // 4. Re-populate the view mode with new data
+                populateViewMode();
+
+                // 5. Switch back to view mode
+                showViewMode();
+
+                // 6. Show a success message
+                showSuccessMessage('Profile updated successfully!');
+            });
+
+            // --- Initial Page Load ---
+            populateViewMode();
+
+        });
+    </script>
+
+</body>
+</html>

@@ -1,11 +1,441 @@
-{% extends 'base.html' %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MotorPart Portal</title>
+    
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&family=Orbitron:wght@700&display=swap" rel="stylesheet">
 
-{% block content %}
-<h2>Login</h2>
-<form method="post">
-    {% csrf_token %}
-    {{ form.as_p }}
-    <button type="submit">Login</button>
-</form>
-<p>Don't have an account? <a href="{% url 'users:register' %}">Register</a></p>
-{% endblock %}
+    <style>
+        /* --- Global Styles --- */
+        :root {
+            --primary-color: #ffc107; /* A strong, "industrial" yellow */
+            --dark-bg: #1a1a1a;
+            --medium-bg: #2a2a2a;
+            --dark-text: #111;
+            --light-text: #f0f0f0;
+            --error-red: #e74c3c;
+            --success-green: #2ecc71;
+            --border-color: #444;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Roboto', sans-serif;
+            background: linear-gradient(135deg, var(--dark-bg), #111);
+            color: var(--light-text);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        /* --- Main Container --- */
+        .portal-container {
+            background: var(--medium-bg);
+            border-radius: 10px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+            overflow: hidden;
+            width: 100%;
+            max-width: 400px;
+            /* Cool top border for accent */
+            border-top: 6px solid var(--primary-color);
+            animation: fadeIn 0.5s ease-out;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* --- Form Header --- */
+        .portal-header {
+            padding: 30px;
+            text-align: center;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .portal-header h2 {
+            font-family: 'Orbitron', sans-serif;
+            color: var(--primary-color);
+            font-size: 2.5em;
+            text-shadow: 0 0 10px rgba(255, 193, 7, 0.3);
+            margin-bottom: 5px;
+        }
+
+        .portal-header p {
+            font-size: 0.9em;
+            color: #aaa;
+        }
+
+        /* --- Form Body (Common styles for both forms) --- */
+        .form-content {
+            padding: 30px;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .input-group {
+            position: relative;
+        }
+
+        .input-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: bold;
+            font-size: 0.9em;
+            color: #ccc;
+        }
+
+        .input-group input {
+            width: 100%;
+            padding: 12px 15px;
+            background: var(--dark-bg);
+            border: 2px solid var(--border-color);
+            border-radius: 5px;
+            color: var(--light-text);
+            font-size: 1em;
+            transition: border-color 0.3s, box-shadow 0.3s;
+        }
+
+        .input-group input:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 10px rgba(255, 193, 7, 0.2);
+        }
+
+        /* --- Submit Button --- */
+        .portal-button {
+            background: var(--primary-color);
+            color: var(--dark-text);
+            border: none;
+            border-radius: 5px;
+            padding: 15px;
+            font-size: 1.1em;
+            font-weight: bold;
+            cursor: pointer;
+            transition: background-color 0.3s, transform 0.1s;
+            margin-top: 10px;
+        }
+
+        .portal-button:hover {
+            background-color: #ffca2c; /* Slightly brighter on hover */
+        }
+
+        .portal-button:active {
+            transform: scale(0.98);
+        }
+        
+        /* Green button for register */
+        .portal-button.register {
+            background: var(--success-green);
+            color: var(--light-text);
+        }
+        .portal-button.register:hover {
+            background: #27ae60;
+        }
+
+
+        /* --- Error/Success Messages --- */
+        .message {
+            padding: 10px;
+            border-radius: 5px;
+            text-align: center;
+            font-size: 0.9em;
+            display: none; /* Hide by default */
+            margin-bottom: 15px;
+        }
+        .message.error {
+            color: var(--error-red);
+            background: rgba(231, 76, 60, 0.1);
+            border: 1px solid var(--error-red);
+        }
+        .message.success {
+            color: var(--success-green);
+            background: rgba(46, 204, 113, 0.1);
+            border: 1px solid var(--success-green);
+        }
+
+        /* --- Success Screen --- */
+        .success-screen {
+            text-align: center;
+            padding: 40px;
+            animation: fadeIn 0.5s;
+        }
+
+        .success-screen h1 {
+            color: var(--primary-color);
+            font-size: 2em;
+            margin-bottom: 10px;
+        }
+
+        /* --- Form Toggle Link --- */
+        .form-toggle-link {
+            text-align: center;
+            margin-top: 10px;
+        }
+
+        .form-toggle-link a {
+            color: var(--primary-color);
+            text-decoration: none;
+            font-weight: bold;
+            font-size: 0.9em;
+            cursor: pointer;
+        }
+
+        .form-toggle-link a:hover {
+            text-decoration: underline;
+        }
+
+        /* --- Form Switching Logic --- */
+        
+        /* By default, show login form and hide register form */
+        #register-form {
+            display: none;
+        }
+
+        /* When container has .show-register class... */
+        .portal-container.show-register #login-form {
+            display: none; /* ...hide login */
+        }
+        .portal-container.show-register #register-form {
+            display: block; /* ...show register */
+        }
+        .portal-container.show-register .portal-header p {
+            content: 'Create your account'; /* (This won't work, will change in JS) */
+        }
+
+
+    </style>
+</head>
+<body>
+
+    <div class="portal-container" id="portal-container">
+        
+        <div class="portal-header">
+            <h2>🔧 MotorPro</h2>
+            <p id="portal-subtitle">Parts & Service Portal Login</p>
+        </div>
+
+        <form id="login-form" class="form-content">
+            
+            <p classid="login-message" class="message error"></p>
+
+            <div class="input-group">
+                <label for="username">Username</label>
+                <input type="text" id="username" name="username" placeholder="e.g., admin" required>
+            </div>
+            
+            <div class="input-group">
+                <label for="password">Password</label>
+                <input type="password" id="password" name="password" placeholder="Enter your password" required>
+            </div>
+            
+            <button type="submit" class="portal-button">Log In</button>
+
+            <div class="form-toggle-link">
+                <a id="show-register-link">Don't have an account? Register</a>
+            </div>
+        </form>
+
+        <form id="register-form" class="form-content">
+            
+            <p id="register-message" class="message"></p>
+
+            <div class="input-group">
+                <label for="new-username">Username</label>
+                <input type="text" id="new-username" name="new-username" placeholder="Choose a username" required>
+            </div>
+            
+            <div class="input-group">
+                <label for="new-password">Password</label>
+                <input type="password" id="new-password" name="new-password" placeholder="Min. 8 characters" required>
+            </div>
+
+            <div class="input-group">
+                <label for="confirm-password">Confirm Password</label>
+                <input type="password" id="confirm-password" name="confirm-password" placeholder="Repeat your password" required>
+            </div>
+            
+            <button type="submit" class="portal-button register">Create Account</button>
+
+            <div class="form-toggle-link">
+                <a id="show-login-link">Already have an account? Log In</a>
+            </div>
+        </form>
+
+    </div>
+
+    <script>
+        // --- JavaScript for Validation and Toggling ---
+
+        document.addEventListener('DOMContentLoaded', () => {
+
+            // --- Get references to the HTML elements ---
+            const portalContainer = document.getElementById('portal-container');
+            const portalSubtitle = document.getElementById('portal-subtitle');
+            
+            // Login Form
+            const loginForm = document.getElementById('login-form');
+            const usernameInput = document.getElementById('username');
+            const passwordInput = document.getElementById('password');
+            const loginMessage = document.getElementById('login-message');
+            const showRegisterLink = document.getElementById('show-register-link');
+
+            // Register Form
+            const registerForm = document.getElementById('register-form');
+            const newUsernameInput = document.getElementById('new-username');
+            const newPasswordInput = document.getElementById('new-password');
+            const confirmPasswordInput = document.getElementById('confirm-password');
+            const registerMessage = document.getElementById('register-message');
+            const showLoginLink = document.getElementById('show-login-link');
+
+
+            // --- A "mock" database of users ---
+            // In a real application, this would be a server database.
+            const validUsers = {
+                "admin": "SecurePass123",
+                "manager": "PartsManager!",
+                "mechanic": "fixitfast"
+            };
+
+            // --- Toggle Links Event Listeners ---
+            showRegisterLink.addEventListener('click', () => {
+                portalContainer.classList.add('show-register');
+                portalSubtitle.textContent = 'Create Your Account';
+                hideMessages();
+            });
+
+            showLoginLink.addEventListener('click', () => {
+                portalContainer.classList.remove('show-register');
+                portalSubtitle.textContent = 'Parts & Service Portal Login';
+                hideMessages();
+            });
+
+
+            // --- Login Form Submission ---
+            loginForm.addEventListener('submit', (event) => {
+                event.preventDefault();
+                const username = usernameInput.value.trim();
+                const password = passwordInput.value;
+
+                if (username === '' || password === '') {
+                    showLoginError('Please enter both username and password.');
+                    return;
+                }
+                
+                // Check if user exists and password is correct
+                if (validUsers.hasOwnProperty(username) && validUsers[username] === password) {
+                    showSuccess(username);
+                } else {
+                    showLoginError('Invalid username or password.');
+                }
+            });
+
+            // --- Register Form Submission ---
+            registerForm.addEventListener('submit', (event) => {
+                event.preventDefault();
+                const newUsername = newUsernameInput.value.trim();
+                const newPassword = newPasswordInput.value;
+                const confirmPassword = confirmPasswordInput.value;
+
+                // 1. Check for empty fields
+                if (newUsername === '' || newPassword === '' || confirmPassword === '') {
+                    showRegisterMessage('Please fill out all fields.', 'error');
+                    return;
+                }
+
+                // 2. Check if username is already taken
+                if (validUsers.hasOwnProperty(newUsername)) {
+                    showRegisterMessage('Username is already taken.', 'error');
+                    return;
+                }
+
+                // 3. Check password length
+                if (newPassword.length < 8) {
+                    showRegisterMessage('Password must be at least 8 characters long.', 'error');
+                    return;
+                }
+
+                // 4. Check if passwords match
+                if (newPassword !== confirmPassword) {
+                    showRegisterMessage('Passwords do not match.', 'error');
+                    return;
+                }
+
+                // --- SUCCESSFUL REGISTRATION ---
+                
+                // 5. "Register" the user (add to our mock database)
+                validUsers[newUsername] = newPassword;
+                console.log('Registered new user:', newUsername);
+                console.log('Updated user list:', validUsers);
+
+                // 6. Show success message and switch to login
+                showRegisterMessage('Account created successfully! Please log in.', 'success');
+                
+                // Clear registration form fields
+                registerForm.reset();
+                
+                // Switch to login form after 2 seconds
+                setTimeout(() => {
+                    showLoginLink.click(); // Programmatically click the "Log In" link
+                    hideMessages();
+                    usernameInput.value = newUsername; // Pre-fill username for convenience
+                    passwordInput.focus();
+                }, 2000);
+            });
+
+            // --- Helper Functions ---
+
+            function showLoginError(message) {
+                loginMessage.textContent = message;
+                loginMessage.style.display = 'block';
+            }
+
+            function showRegisterMessage(message, type = 'error') {
+                registerMessage.textContent = message;
+                registerMessage.className = `message ${type}`; // Set class to 'message error' or 'message success'
+                registerMessage.style.display = 'block';
+            }
+
+            function hideMessages() {
+                loginMessage.style.display = 'none';
+                registerMessage.style.display = 'none';
+            }
+
+            function showSuccess(username) {
+                portalContainer.innerHTML = `
+                    <div class="success-screen">
+                        <h1>Login Successful!</h1>
+                        <p>Welcome back, <strong>${username}</strong>.</p>
+                        <p>Redirecting to your dashboard...</p>
+                    </div>
+                `;
+            }
+            
+            // Hide error messages when the user starts typing
+            usernameInput.addEventListener('input', hideMessages);
+            passwordInput.addEventListener('input', hideMessages);
+            newUsernameInput.addEventListener('input', hideMessages);
+            newPasswordInput.addEventListener('input', hideMessages);
+            confirmPasswordInput.addEventListener('input', hideMessages);
+        });
+
+    </script>
+
+</body>
+</html>
