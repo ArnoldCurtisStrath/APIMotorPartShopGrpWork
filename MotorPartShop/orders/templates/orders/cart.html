@@ -1,0 +1,64 @@
+{% extends 'base.html' %}
+
+{% block title %}Cart - Motor Parts Shop{% endblock %}
+
+{% block content %}
+<h1>Shopping Cart</h1>
+
+{% if cart.items.all %}
+    <table style="width: 100%; border-collapse: collapse;">
+        <thead>
+            <tr style="border-bottom: 2px solid #000;">
+                <th style="text-align: left; padding: 1rem;">Part</th>
+                <th>Price</th>
+                <th>Quantity</th>
+                <th>Subtotal</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for item in cart.items.all %}
+            <tr style="border-bottom: 1px solid #ccc;">
+                <td style="padding: 1rem;">
+                    <a href="{% url 'parts:detail' item.part.pk %}">{{ item.part.name }}</a>
+                </td>
+                <td style="text-align: center;">KSh {{ item.part.price }}</td>
+                <td style="text-align: center;">
+                    <form method="post" action="{% url 'orders:update_cart_item' item.pk %}" style="display: inline;">
+                        {% csrf_token %}
+                        <input type="number" name="quantity" value="{{ item.quantity }}" 
+                               min="1" max="{{ item.part.stock }}" style="width: 60px;">
+                        <button type="submit">Update</button>
+                    </form>
+                </td>
+                <td style="text-align: center;">KSh {{ item.subtotal }}</td>
+                <td style="text-align: center;">
+                    <form method="post" action="{% url 'orders:remove_from_cart' item.pk %}" style="display: inline;">
+                        {% csrf_token %}
+                        <button type="submit" style="background: red; color: white;">Remove</button>
+                    </form>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+        <tfoot>
+            <tr style="border-top: 2px solid #000;">
+                <td colspan="3" style="text-align: right; padding: 1rem;"><strong>Total:</strong></td>
+                <td style="text-align: center;"><strong>KSh {{ cart.total_price }}</strong></td>
+                <td></td>
+            </tr>
+        </tfoot>
+    </table>
+    
+    <div style="margin-top: 2rem;">
+        <a href="{% url 'orders:checkout' %}" style="padding: 1rem 2rem; background: green; color: white; text-decoration: none;">Proceed to Checkout</a>
+        <form method="post" action="{% url 'orders:clear_cart' %}" style="display: inline;">
+            {% csrf_token %}
+            <button type="submit" style="padding: 1rem 2rem; background: red; color: white;">Clear Cart</button>
+        </form>
+    </div>
+{% else %}
+    <p>Your cart is empty.</p>
+    <a href="{% url 'parts:list' %}">Continue Shopping</a>
+{% endif %}
+{% endblock %}

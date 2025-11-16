@@ -1,0 +1,56 @@
+{% extends 'base.html' %}
+
+{% block title %}Checkout - Motor Parts Shop{% endblock %}
+
+{% block content %}
+<h1>Checkout</h1>
+
+<h2>Order Summary</h2>
+<table style="width: 100%; border-collapse: collapse; margin-bottom: 2rem;">
+    <thead>
+        <tr style="border-bottom: 2px solid #000;">
+            <th style="text-align: left; padding: 0.5rem;">Part</th>
+            <th>Quantity</th>
+            <th>Price</th>
+            <th>Subtotal</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for item in cart.items.all %}
+        <tr style="border-bottom: 1px solid #ccc;">
+            <td style="padding: 0.5rem;">{{ item.part.name }}</td>
+            <td style="text-align: center;">{{ item.quantity }}</td>
+            <td style="text-align: center;">KSh {{ item.part.price }}</td>
+            <td style="text-align: center;">KSh {{ item.subtotal }}</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+    <tfoot>
+        <tr style="border-top: 2px solid #000;">
+            <td colspan="3" style="text-align: right; padding: 0.5rem;"><strong>Total:</strong></td>
+            <td style="text-align: center;"><strong>KSh {{ cart.total_price }}</strong></td>
+        </tr>
+    </tfoot>
+</table>
+
+<h2>Delivery Information</h2>
+<p><strong>Name:</strong> {{ user.get_full_name|default:user.username }}</p>
+<p><strong>Email:</strong> {{ user.email }}</p>
+<p><strong>Phone:</strong> {{ user.profile.phone_number }}</p>
+<p><strong>Address:</strong> {{ user.profile.address }}</p>
+<p><strong>City:</strong> {{ user.profile.city }}</p>
+
+{% if not user.profile.address or not user.profile.phone_number %}
+    <p style="color: red;">Please complete your profile before placing an order.</p>
+    <a href="{% url 'users:profile' %}">Update Profile</a>
+{% else %}
+    <form method="post">
+        {% csrf_token %}
+        <button type="submit" style="padding: 1rem 2rem; background: green; color: white; font-size: 1.1rem;">
+            Place Order
+        </button>
+    </form>
+{% endif %}
+
+<a href="{% url 'orders:cart' %}" style="margin-top: 1rem; display: inline-block;">Back to Cart</a>
+{% endblock %}

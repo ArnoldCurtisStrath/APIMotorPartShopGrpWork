@@ -1,0 +1,37 @@
+{% extends 'base.html' %}
+
+{% block title %}Order History - Motor Parts Shop{% endblock %}
+
+{% block content %}
+<h1>Order History</h1>
+
+{% if orders %}
+    <table style="width: 100%; border-collapse: collapse;">
+        <thead>
+            <tr style="border-bottom: 2px solid #000;">
+                <th style="text-align: left; padding: 1rem;">Order #</th>
+                <th>Date</th>
+                <th>Status</th>
+                <th>Total</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for order in orders %}
+            <tr style="border-bottom: 1px solid #ccc;">
+                <td style="padding: 1rem;">{{ order.id }}</td>
+                <td style="text-align: center;">{{ order.created_at|date:"M d, Y" }}</td>
+                <td style="text-align: center;">{{ order.get_status_display }}</td>
+                <td style="text-align: center;">KSh {{ order.total_price }}</td>
+                <td style="text-align: center;">
+                    <a href="{% url 'orders:order_detail' order.id %}">View Details</a>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+{% else %}
+    <p>You haven't placed any orders yet.</p>
+    <a href="{% url 'parts:list' %}">Start Shopping</a>
+{% endif %}
+{% endblock %}

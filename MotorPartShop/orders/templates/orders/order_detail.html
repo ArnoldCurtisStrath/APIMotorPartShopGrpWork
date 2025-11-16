@@ -1,0 +1,37 @@
+{% extends 'base.html' %}
+
+{% block title %}Order {{ order.id }} - Motor Parts Shop{% endblock %}
+
+{% block content %}
+<h1>Order {{ order.id }}</h1>
+
+<div style="background: #f5f5f5; padding: 1rem; margin-bottom: 2rem;">
+    <p><strong>Date:</strong> {{ order.created_at|date:"M d, Y H:i" }}</p>
+    <p><strong>Status:</strong> {{ order.get_status_display }}</p>
+    <p><strong>Total:</strong> KSh {{ order.total_price }}</p>
+</div>
+
+<h2>Order Items</h2>
+<table style="width: 100%; border-collapse: collapse;">
+    <thead>
+        <tr style="border-bottom: 2px solid #000;">
+            <th style="text-align: left; padding: 0.5rem;">Part</th>
+            <th>Quantity</th>
+            <th>Price</th>
+            <th>Subtotal</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for item in order.items.all %}
+        <tr style="border-bottom: 1px solid #ccc;">
+            <td style="padding: 0.5rem;">{{ item.part.name }}</td>
+            <td style="text-align: center;">{{ item.quantity }}</td>
+            <td style="text-align: center;">KSh {{ item.price }}</td>
+            <td style="text-align: center;">KSh {{ item.subtotal }}</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+
+<a href="{% url 'orders:order_history' %}" style="margin-top: 2rem; display: inline-block;">Back to Order History</a>
+{% endblock %}
