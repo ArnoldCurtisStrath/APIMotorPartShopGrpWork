@@ -1,0 +1,50 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-8">
+        <h2>Write Review for {{ part.name }}</h2>
+        
+        <form method="post" class="mt-4">
+            {% csrf_token %}
+            
+            <div class="mb-3">
+                <label for="id_title" class="form-label">Review Title</label>
+                <input type="text" class="form-control {% if form.title.errors %}is-invalid{% endif %}" 
+                       id="id_title" name="title" value="{{ form.title.value|default:'' }}" maxlength="200" required>
+                {% if form.title.errors %}
+                <div class="invalid-feedback">{{ form.title.errors.0 }}</div>
+                {% endif %}
+            </div>
+
+            <div class="mb-3">
+                <label for="id_rating" class="form-label">Rating</label>
+                <select class="form-select {% if form.rating.errors %}is-invalid{% endif %}" 
+                        id="id_rating" name="rating" required>
+                    <option value="">Choose...</option>
+                    <option value="5">5 Stars - Excellent</option>
+                    <option value="4">4 Stars - Good</option>
+                    <option value="3">3 Stars - Average</option>
+                    <option value="2">2 Stars - Poor</option>
+                    <option value="1">1 Star - Terrible</option>
+                </select>
+                {% if form.rating.errors %}
+                <div class="invalid-feedback">{{ form.rating.errors.0 }}</div>
+                {% endif %}
+            </div>
+
+            <div class="mb-3">
+                <label for="id_comment" class="form-label">Your Review</label>
+                <textarea class="form-control {% if form.comment.errors %}is-invalid{% endif %}" 
+                          id="id_comment" name="comment" rows="6" required>{{ form.comment.value|default:'' }}</textarea>
+                {% if form.comment.errors %}
+                <div class="invalid-feedback">{{ form.comment.errors.0 }}</div>
+                {% endif %}
+            </div>
+
+            <button type="submit" class="btn btn-primary">Submit Review</button>
+            <a href="{% url 'parts:detail' part.pk %}" class="btn btn-secondary">Cancel</a>
+        </form>
+    </div>
+</div>
+{% endblock %}

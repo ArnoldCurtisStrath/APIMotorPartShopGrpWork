@@ -1,0 +1,32 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-body">
+                <h3 class="card-title">Delete Review</h3>
+                <p class="mt-3">Are you sure you want to delete your review for <strong>{{ review.part.name }}</strong>?</p>
+                
+                <div class="alert alert-warning mt-3">
+                    <strong>Warning:</strong> This action cannot be undone.
+                </div>
+
+                <div class="card mt-3 bg-light">
+                    <div class="card-body">
+                        <h5>{{ review.title }} <span class="text-warning">{{ review.rating }}★</span></h5>
+                        <p class="text-muted">Written on {{ review.created_at|date:"M d, Y" }}</p>
+                        <p>{{ review.comment }}</p>
+                    </div>
+                </div>
+
+                <form method="post" class="mt-4">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-danger">Yes, Delete Review</button>
+                    <a href="{% url 'parts:detail' review.part.pk %}" class="btn btn-secondary">Cancel</a>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
