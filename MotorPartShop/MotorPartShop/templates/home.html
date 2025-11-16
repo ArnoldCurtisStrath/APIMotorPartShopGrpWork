@@ -1,7 +1,55 @@
 {% extends 'base.html' %}
 
 {% block content %}
-<h1>Welcome to Motor Parts Shop</h1>
-<p>Your one-stop shop for quality motor parts</p>
-<a href="{% url 'parts:list' %}">View Parts</a>
+<div class="jumbotron bg-primary text-white p-5 rounded">
+    <h1><i class="fas fa-car"></i> Motor Parts Shop</h1>
+    <p class="lead">Quality parts for your vehicle</p>
+    <a href="{% url 'parts:list' %}" class="btn btn-light btn-lg">Shop Now</a>
+</div>
+
+<div class="row mt-4">
+    <div class="col-md-4">
+        <div class="card">
+            <div class="card-body text-center">
+                <i class="fas fa-truck fa-3x text-primary mb-3"></i>
+                <h5>Fast Delivery</h5>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card">
+            <div class="card-body text-center">
+                <i class="fas fa-shield-alt fa-3x text-success mb-3"></i>
+                <h5>Quality Guaranteed</h5>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card">
+            <div class="card-body text-center">
+                <i class="fas fa-headset fa-3x text-info mb-3"></i>
+                <h5>24/7 Support</h5>
+            </div>
+        </div>
+    </div>
+</div>
+
+<h2 class="mt-5">Featured Parts</h2>
+<div class="row">
+    {% for part in featured_parts %}
+    <div class="col-md-3 mb-4">
+        <div class="card">
+            {% if part.image %}
+            <img src="{{ part.image.url }}" class="card-img-top" style="height:200px;object-fit:cover;">
+            {% endif %}
+            <div class="card-body">
+                <h5 class="card-title">{{ part.name }}</h5>
+                <p class="text-muted">{{ part.category.name }}</p>
+                <p class="h5 text-primary">KSh {{ part.price }}</p>
+                <a href="{% url 'parts:detail' part.pk %}" class="btn btn-primary btn-sm">View</a>
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+</div>
 {% endblock %}

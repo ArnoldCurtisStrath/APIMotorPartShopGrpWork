@@ -15,3 +15,6 @@ urlpatterns = [
 if settings.DEBUG:
     urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
 
+handler404 = 'MotorPartShop.views.handler404'
+handler500 = 'MotorPartShop.views.handler500'
+

@@ -3,36 +3,93 @@
 {% block title %}Parts - Motor Parts Shop{% endblock %}
 
 {% block content %}
-<h1>Available Parts</h1>
+<h1 class="mb-4">Available Parts</h1>
 
-<div style="margin: 2rem 0;">
-    <a href="{% url 'parts:list' %}">All Parts</a>
-    {% for category in categories %}
-        | <a href="{% url 'parts:by_category' category.id %}">{{ category.name }}</a>
-    {% endfor %}
+<div class="mb-4">
+    <div class="btn-group" role="group">
+        <a href="{% url 'parts:list' %}" class="btn btn-outline-primary">All Parts</a>
+        {% for category in categories %}
+            <a href="{% url 'parts:by_category' category.id %}" 
+               class="btn btn-outline-primary {% if selected_category.id == category.id %}active{% endif %}">
+                {{ category.name }}
+            </a>
+        {% endfor %}
+    </div>
 </div>
 
 {% if selected_category %}
-    <h2>{{ selected_category.name }}</h2>
+    <h2 class="mb-3">{{ selected_category.name }}</h2>
 {% endif %}
 
 {% if parts %}
-<div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 2rem;">
+<div class="row">
     {% for part in parts %}
-    <div style="border: 1px solid #ccc; border-radius: 8px; padding: 1rem; box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);">
-        {% if part.image %}
-            <img src="{{ part.image.url }}" alt="{{ part.name }}" style="width: 100%; height: 200px; object-fit: cover; border-radius: 4px;">
-        {% endif %}
-        <h3 style="margin-top: 1rem;">{{ part.name }}</h3>
-        <p style="color: #555;">{{ part.category.name }}</p>
-        <p><strong>KSh {{ part.price }}</strong></p>
-        <p>{% if part.in_stock %}In Stock{% else %}Out of Stock{% endif %}</p>
-        <a href="{% url 'parts:detail' part.pk %}">View Details</a>
+    <div class="col-md-3 mb-4">
+        <div class="card h-100">
+            {% if part.image %}
+                <img src="{{ part.image.url }}" class="card-img-top" style="height:200px;object-fit:cover;" alt="{{ part.name }}">
+            {% else %}
+                <div class="bg-light d-flex align-items-center justify-content-center" style="height:200px;">
+                    <i class="fas fa-image fa-3x text-muted"></i>
+                </div>
+            {% endif %}
+            <div class="card-body d-flex flex-column">
+                <h5 class="card-title">{{ part.name }}</h5>
+                <p class="text-muted">{{ part.category.name }}</p>
+                <p class="h5 text-primary">KSh {{ part.price }}</p>
+                <p class="mb-3">
+                    {% if part.in_stock %}
+                        <span class="badge bg-success">In Stock</span>
+                    {% else %}
+                        <span class="badge bg-danger">Out of Stock</span>
+                    {% endif %}
+                </p>
+                <a href="{% url 'parts:detail' part.pk %}" class="btn btn-primary mt-auto">View Details</a>
+            </div>
+        </div>
     </div>
     {% endfor %}
 </div>
+
+<!-- Pagination -->
+{% if parts.has_other_pages %}
+<nav aria-label="Page navigation">
+    <ul class="pagination justify-content-center">
+        {% if parts.has_previous %}
+            <li class="page-item">
+                <a class="page-link" href="?page={{ parts.previous_page_number }}{% if selected_category %}&category={{ selected_category.id }}{% endif %}">
+                    Previous
+                </a>
+            </li>
+        {% else %}
+            <li class="page-item disabled">
+                <span class="page-link">Previous</span>
+            </li>
+        {% endif %}
+        
+        <li class="page-item active">
+            <span class="page-link">{{ parts.number }} of {{ parts.paginator.num_pages }}</span>
+        </li>
+        
+        {% if parts.has_next %}
+            <li class="page-item">
+                <a class="page-link" href="?page={{ parts.next_page_number }}{% if selected_category %}&category={{ selected_category.id }}{% endif %}">
+                    Next
+                </a>
+            </li>
+        {% else %}
+            <li class="page-item disabled">
+                <span class="page-link">Next</span>
+            </li>
+        {% endif %}
+    </ul>
+</nav>
+{% endif %}
+
 {% else %}
-<p>No parts available in this category.</p>
+<div class="alert alert-info">
+    <i class="fas fa-info-circle"></i> No parts available in this category.
+</div>
 {% endif %}
 {% endblock %}
 
