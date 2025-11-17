@@ -1,37 +1,77 @@
 {% extends 'base.html' %}
 
-{% block title %}Order {{ order.id }} - Motor Parts Shop{% endblock %}
-
 {% block content %}
-<h1>Order {{ order.id }}</h1>
+<div class="container mt-4">
+    <h1>Order #{{ order.id }}</h1>
 
-<div style="background: #f5f5f5; padding: 1rem; margin-bottom: 2rem;">
-    <p><strong>Date:</strong> {{ order.created_at|date:"M d, Y H:i" }}</p>
-    <p><strong>Status:</strong> {{ order.get_status_display }}</p>
-    <p><strong>Total:</strong> KSh {{ order.total_price }}</p>
-</div>
+    <div class="card mb-4">
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-4">
+                    <p><strong>Order Date:</strong> {{ order.created_at|date:"M d, Y H:i" }}</p>
+                </div>
+                <div class="col-md-4">
+                    <p><strong>Status:</strong> <span class="badge bg-primary">{{ order.get_status_display }}</span></p>
+                </div>
+                <div class="col-md-4">
+                    <p><strong>Total:</strong> <span class="text-success h5">KSh {{ order.total_price }}</span></p>
+                </div>
+            </div>
+        </div>
+    </div>
 
-<h2>Order Items</h2>
-<table style="width: 100%; border-collapse: collapse;">
-    <thead>
-        <tr style="border-bottom: 2px solid #000;">
-            <th style="text-align: left; padding: 0.5rem;">Part</th>
-            <th>Quantity</th>
-            <th>Price</th>
-            <th>Subtotal</th>
-        </tr>
-    </thead>
-    <tbody>
-        {% for item in order.items.all %}
-        <tr style="border-bottom: 1px solid #ccc;">
-            <td style="padding: 0.5rem;">{{ item.part.name }}</td>
-            <td style="text-align: center;">{{ item.quantity }}</td>
-            <td style="text-align: center;">KSh {{ item.price }}</td>
-            <td style="text-align: center;">KSh {{ item.subtotal }}</td>
-        </tr>
+    <h4 class="mb-3">Order Progress</h4>
+    <div class="progress mb-4" style="height: 30px;">
+        <div class="progress-bar bg-success" role="progressbar" 
+             style="width: {{ current_index|add:1|mul:25 }}%"
+             aria-valuenow="{{ current_index|add:1|mul:25 }}" 
+             aria-valuemin="0" aria-valuemax="100">
+            Step {{ current_index|add:1 }} of 4
+        </div>
+    </div>
+
+    <div class="row mb-5">
+        {% for step in status_steps %}
+        <div class="col-3 text-center">
+            <div class="{% if forloop.counter0 <= current_index %}text-success{% else %}text-muted{% endif %}">
+                <i class="fas fa-check-circle fa-3x"></i>
+                <p class="mt-2 fw-bold">{{ step|title }}</p>
+            </div>
+        </div>
         {% endfor %}
-    </tbody>
-</table>
+    </div>
 
-<a href="{% url 'orders:order_history' %}" style="margin-top: 2rem; display: inline-block;">Back to Order History</a>
+    <h4 class="mb-3">Order Items</h4>
+    <div class="table-responsive">
+        <table class="table table-striped">
+            <thead class="table-dark">
+                <tr>
+                    <th>Part Name</th>
+                    <th>Quantity</th>
+                    <th>Unit Price</th>
+                    <th>Subtotal</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for item in order.items.all %}
+                <tr>
+                    <td>{{ item.part.name }}</td>
+                    <td>{{ item.quantity }}</td>
+                    <td>KSh {{ item.price }}</td>
+                    <td class="fw-bold">KSh {{ item.subtotal }}</td>
+                </tr>
+                {% endfor %}
+                <tr class="table-success">
+                    <td colspan="3" class="text-end fw-bold">Total:</td>
+                    <td class="fw-bold">KSh {{ order.total_price }}</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <div class="mt-4">
+        <a href="{% url 'orders:order_history' %}" class="btn btn-secondary">Back to Order History</a>
+        <a href="{% url 'parts:list' %}" class="btn btn-primary">Continue Shopping</a>
+    </div>
+</div>
 {% endblock %}
