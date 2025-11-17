@@ -1,3 +1,21 @@
+# ...existing imports...
+from django.contrib.auth.decorators import login_required
+from django.shortcuts import render, get_object_or_404
+# ...existing code...
+
+# Add order_detail view for order status tracking
+@login_required
+def order_detail(request, order_id):
+    order = get_object_or_404(Order, pk=order_id, user=request.user)
+    # Status progression
+    status_steps = ['pending', 'processing', 'shipped', 'delivered']
+    current_index = status_steps.index(order.status) if order.status in status_steps else 0
+    context = {
+        'order': order,
+        'status_steps': status_steps,
+        'current_index': current_index,
+    }
+    return render(request, 'orders/order_detail.html', context)
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
